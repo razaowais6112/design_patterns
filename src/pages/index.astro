@@ -1,11 +1,97 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PatternCard from '../components/patterns/PatternCard.astro';
+import { allPatterns } from '../data/patterns';
+import { categories, categoryPatterns } from '../data/navigation';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const catColors: Record<string, string> = {
+  creational: '#8b5cf6',
+  structural: '#06b6d4',
+  behavioral: '#f59e0b',
+  'data-access': '#10b981',
+};
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<BaseLayout
+  title="Home"
+  description="Learn software design patterns through interactive examples with a burger restaurant theme."
+>
+  <!-- Hero Section -->
+  <div class="relative overflow-hidden rounded-[32px] glass-card p-10 sm:p-16 mb-16 text-center animate-in">
+    <!-- Glow effects -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-1/2 bg-gradient-to-r from-purple-500/30 to-cyan-500/30 blur-[100px] rounded-full"></div>
+    
+    <div class="relative z-10 max-w-2xl mx-auto">
+      <span class="inline-block py-1 px-3 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 text-sm font-semibold tracking-wide mb-6 border border-purple-500/20">
+        Interactive Learning
+      </span>
+      <h1 class="text-4xl sm:text-5xl font-black mb-6 tracking-tight text-balance text-gray-900 dark:text-white">
+        Master <span class="gradient-text bg-gradient-to-r from-purple-500 to-cyan-500">Design Patterns</span>
+      </h1>
+      <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed mb-10 text-balance">
+        Level up your architecture skills. Explore classic software design patterns through intuitive visualizations, interactive examples, and clear code.
+      </p>
+      
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href="#catalog" class="btn-primary">
+          Explore Catalog
+        </a>
+        <a href="https://github.com/razaowais6112/design_patterns" target="_blank" rel="noopener noreferrer" class="chip !text-gray-900 dark:!text-white flex items-center gap-2 px-5 py-2.5">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.45-1.15-1.11-1.46-1.11-1.46-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0012 2z"/></svg>
+          GitHub
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Catalog Section -->
+  <div id="catalog" class="pt-8">
+    <div class="flex items-center gap-4 mb-10">
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-white m-0">Pattern Catalog</h2>
+      <div class="h-px flex-1 bg-gradient-to-r from-gray-200 dark:from-gray-800 to-transparent"></div>
+    </div>
+
+    <div class="space-y-16">
+      {Object.values(categories).map((category, index) => {
+        const catPats = allPatterns.filter(p => p.category.id === category.id);
+        const color = catColors[category.id] || '#8b5cf6';
+        const delayClass = `animate-in-delay-${(index + 1) > 4 ? 4 : (index + 1)}`;
+        
+        return (
+          <div class={`animate-in ${delayClass}`}>
+            <!-- Category Header -->
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={`background: ${color}20; color: ${color};`}>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {category.id === 'creational' && <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2L2 7v10l10 5 10-5V7L12 2zM2 7l10 5M12 12l10-5M12 12v10" />}
+                  {category.id === 'structural' && <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z M9 22V12h6v10" />}
+                  {category.id === 'behavioral' && <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.674M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3M16 12a4 4 0 11-8 0 4 4 0 018 0z" />}
+                  {category.id === 'data-access' && <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7M4 7h16M8 2v3M16 2v3" />}
+                </svg>
+              </div>
+              <h3 class="text-xl font-bold text-gray-900 dark:text-white m-0">
+                <a href={category.slug} class="hover:underline decoration-2 underline-offset-4" style={`text-decoration-color: ${color};`}>
+                  {category.name}
+                </a>
+              </h3>
+              <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+                {catPats.length}
+              </span>
+            </div>
+            
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-3xl">
+              {category.description}
+            </p>
+
+            <!-- Grid -->
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {catPats.map(pattern => (
+                <PatternCard pattern={pattern} />
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+</BaseLayout>
