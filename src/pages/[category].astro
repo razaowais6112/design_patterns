@@ -1,0 +1,95 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PatternCard from '../components/patterns/PatternCard.astro';
+import { getPatternsByCategory } from '../data/patterns';
+import { categories, categoryPatterns } from '../data/navigation';
+
+export async function getStaticPaths() {
+  return Object.keys(categories).map(catId => ({
+    params: { category: catId },
+    props: { category: categories[catId as keyof typeof categories] },
+  }));
+}
+
+const { category } = Astro.props;
+const patterns = getPatternsByCategory(category.id);
+
+const catMeta: Record<string, { color: string; gradient: string; iconPath: string }> = {
+  creational: {
+    color: '#8b5cf6',
+    gradient: 'linear-gradient(135deg, #8b5cf6, #a78bfa)',
+    iconPath: 'M12 2L2 7v10l10 5 10-5V7L12 2zM2 7l10 5M12 12l10-5M12 12v10',
+  },
+  structural: {
+    color: '#06b6d4',
+    gradient: 'linear-gradient(135deg, #06b6d4, #22d3ee)',
+    iconPath: 'M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z M9 22V12h6v10',
+  },
+  behavioral: {
+    color: '#f59e0b',
+    gradient: 'linear-gradient(135deg, #f59e0b, #fbbf24)',
+    iconPath: 'M9.663 17h4.674M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3M16 12a4 4 0 11-8 0 4 4 0 018 0z',
+  },
+  'data-access': {
+    color: '#10b981',
+    gradient: 'linear-gradient(135deg, #10b981, #34d399)',
+    iconPath: 'M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7M4 7h16M8 2v3M16 2v3',
+  },
+};
+
+const meta = catMeta[category.id] || catMeta.creational;
+---
+
+<BaseLayout
+  title={`${category.name} Patterns`}
+  breadcrumbs={[
+    { label: 'Home', href: '/' },
+    { label: category.name },
+  ]}
+>
+  <!-- Category Header -->
+  <div class="mb-10 animate-in">
+    <div class="relative rounded-2xl overflow-hidden p-8 sm:p-10" style={`border: 1px solid ${meta.color}20;`}>
+      <!-- Background glow -->
+      <div class="absolute inset-0 opacity-[0.04] dark:opacity-[0.06]" style={`background: ${meta.gradient};`}></div>
+
+      <div class="relative flex items-start gap-5">
+        <div class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg" style={`background: ${meta.gradient};`}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d={meta.iconPath} />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-3 mb-2">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white" style="font-family: var(--font-sans);">
+              {category.name} Patterns
+            </h1>
+            <span class="text-xs font-semibold tabular-nums px-2 py-0.5 rounded-full"
+              style={`color: ${meta.color}; background: ${meta.color}15;`}
+            >{patterns.length}</span>
+          </div>
+          <p class="text-gray-500 dark:text-gray-400 leading-relaxed max-w-xl">{category.description}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {category.id === 'data-access' && (
+    <div class="mb-8 rounded-xl p-4 border border-amber-400/20 dark:border-amber-400/10 animate-in animate-in-delay-1" style="background: rgba(245, 158, 11, 0.04);">
+      <div class="flex items-start gap-3">
+        <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+          <strong class="text-gray-700 dark:text-gray-300">Note:</strong> Data Access is not part of the original Gang of Four catalog. It's included here because it's commonly used alongside classic design patterns in real systems.
+        </p>
+      </div>
+    </div>
+  )}
+
+  <div class="grid sm:grid-cols-2 gap-3 animate-in animate-in-delay-2">
+    {patterns.map(pattern => (
+      <PatternCard pattern={pattern} />
+    ))}
+  </div>
+</BaseLayout>

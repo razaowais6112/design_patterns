@@ -1,0 +1,133 @@
+---
+export interface Props {
+  title: string;
+  breadcrumbs?: Array<{ label: string; href?: string }>;
+}
+
+const { title, breadcrumbs } = Astro.props;
+import DarkModeToggle from '../ui/DarkModeToggle';
+---
+
+<!-- Spacer to prevent content from jumping under the fixed header -->
+<div class="h-14 w-full"></div>
+
+<header class="fixed top-0 left-0 right-0 lg:left-[272px] z-30 border-b border-gray-200/50 dark:border-white/[0.04] bg-white/80 dark:bg-surface-0/80 backdrop-blur-xl">
+  <div class="flex items-center justify-between px-4 sm:px-6 lg:px-10 h-14">
+    <div class="flex items-center gap-3 min-w-0">
+      <!-- Mobile sidebar toggle -->
+      <button id="mobile-menu-btn" class="lg:hidden p-2 -ml-2 rounded-xl text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/[0.06] transition-all" aria-label="Toggle menu">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+
+      {breadcrumbs && breadcrumbs.length > 0 && (
+        <nav class="flex items-center gap-1.5 text-sm min-w-0" aria-label="Breadcrumb">
+          {breadcrumbs.map((crumb, i) => (
+            <span class="flex items-center gap-1.5 min-w-0">
+              {i > 0 && (
+                <svg class="w-3.5 h-3.5 flex-shrink-0 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              )}
+              {crumb.href ? (
+                <a href={crumb.href} class="truncate text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">{crumb.label}</a>
+              ) : (
+                <span class="truncate text-gray-900 dark:text-white font-medium">{crumb.label}</span>
+              )}
+            </span>
+          ))}
+        </nav>
+      )}
+    </div>
+
+    <div class="flex items-center gap-2">
+      <DarkModeToggle client:idle />
+    </div>
+  </div>
+</header>
+
+<!-- Mobile menu overlay -->
+<div id="mobile-menu-overlay" class="hidden fixed inset-0 z-[100] lg:hidden">
+    <!-- Backdrop -->
+    <div id="mobile-backdrop" class="absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm transition-opacity"></div>
+    <!-- Drawer -->
+    <div id="mobile-drawer" class="absolute left-0 top-0 h-full w-[280px] bg-white dark:bg-surface-1 shadow-2xl overflow-y-auto scrollbar-thin transition-transform">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200/50 dark:border-white/[0.04]">
+        <a href="/" class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-[9px] flex items-center justify-center text-white" style="background: linear-gradient(135deg, #8b5cf6, #06b6d4); box-shadow: 0 3px 10px rgba(139, 92, 246, 0.25);">
+            <svg width="16" height="16" viewBox="0 0 32 32" fill="none">
+              <rect x="4" y="4" width="10" height="10" rx="2.5" fill="white" opacity="0.9"/>
+              <rect x="18" y="4" width="10" height="10" rx="2.5" fill="white" opacity="0.6"/>
+              <rect x="4" y="18" width="10" height="10" rx="2.5" fill="white" opacity="0.6"/>
+              <rect x="18" y="18" width="10" height="10" rx="2.5" fill="white" opacity="0.35"/>
+            </svg>
+          </div>
+          <span class="font-bold text-gray-900 dark:text-white">Design Patterns</span>
+        </a>
+        <button id="close-menu-btn" class="p-2 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/[0.06] transition-all">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div id="mobile-sidebar-content" class="py-2"></div>
+    </div>
+</div>
+
+<script>
+  const menuBtn = document.getElementById('mobile-menu-btn');
+  const overlay = document.getElementById('mobile-menu-overlay');
+  const closeBtn = document.getElementById('close-menu-btn');
+  const mobileContent = document.getElementById('mobile-sidebar-content');
+  const backdrop = document.getElementById('mobile-backdrop');
+  const drawer = document.getElementById('mobile-drawer');
+
+  if (menuBtn && overlay && mobileContent) {
+    // Clone sidebar nav into mobile overlay
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar) {
+      const navEl = sidebar.querySelector('nav');
+      if (navEl) {
+        const clone = navEl.cloneNode(true) as HTMLElement;
+        clone.classList.add('px-2', 'py-2');
+        mobileContent.appendChild(clone);
+      }
+    }
+
+    const open = () => {
+      overlay.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      // Trigger animation
+      requestAnimationFrame(() => {
+        drawer?.style.setProperty('transform', 'translateX(0)');
+        backdrop?.style.setProperty('opacity', '1');
+      });
+    };
+
+    const close = () => {
+      drawer?.style.setProperty('transform', 'translateX(-100%)');
+      backdrop?.style.setProperty('opacity', '0');
+      setTimeout(() => {
+        overlay.classList.add('hidden');
+        document.body.style.overflow = '';
+      }, 200);
+    };
+
+    menuBtn.addEventListener('click', open);
+    closeBtn?.addEventListener('click', close);
+    backdrop?.addEventListener('click', close);
+  }
+</script>
+
+<style>
+  #mobile-drawer {
+    transform: translateX(-100%);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  #mobile-backdrop {
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+</style>
